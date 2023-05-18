@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "998208659345",
+    "project_id": "beardating-d48a5",
+    "storage_bucket": "beardating-d48a5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:998208659345:android:7d03a63296fd1c87260430",
+        "android_client_info": {
+          "package_name": "com.phannguyen.datingapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "998208659345-tnsn9cca04180q7mghub7hs5vd55nd2n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWLdAdiptzNXF6gYFICsF_zeV1YU57zfg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "998208659345-tnsn9cca04180q7mghub7hs5vd55nd2n.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
