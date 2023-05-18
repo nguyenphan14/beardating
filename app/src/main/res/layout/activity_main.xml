@@ -41,13 +41,6 @@
             android:textColor="@color/red"
             android:textSize="20dp"
             android:textStyle="bold" />
-
-        <ImageView
-            android:layout_width="37dp"
-            android:layout_height="37dp"
-            android:onClick="goToMatches"
-            android:scaleType="centerCrop"
-            android:src="@drawable/iconmessage" />
     </LinearLayout>
 
     <com.lorentzos.flingswipe.SwipeFlingAdapterView

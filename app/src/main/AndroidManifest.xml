@@ -14,12 +14,6 @@
             android:name="com.phannguyen.datingapp.ViewProfileActivity"
             android:exported="false" />
         <activity
-            android:name="com.phannguyen.datingapp.Chat.ChatActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.phannguyen.datingapp.Matches.MatchesActivity"
-            android:exported="false" />
-        <activity
             android:name="com.phannguyen.datingapp.SettingsActivity"
             android:exported="false" />
         <activity

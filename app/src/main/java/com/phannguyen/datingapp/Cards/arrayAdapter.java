@@ -13,15 +13,15 @@ import com.phannguyen.datingapp.R;
 
 import java.util.List;
 
-public class arrayAdapter extends ArrayAdapter<cards> {
+public class arrayAdapter extends ArrayAdapter<Cards> {
     Context context;
 
-    public arrayAdapter(Context context, int resourceId, List<cards> items) {
+    public arrayAdapter(Context context, int resourceId, List<Cards> items) {
         super(context,resourceId,items);
     }
     public View getView(int position, View convertView, ViewGroup parent){
 
-        cards card_item =getItem(position);
+        Cards card_item =getItem(position);
         if(convertView==null){
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.item,parent,false);
 

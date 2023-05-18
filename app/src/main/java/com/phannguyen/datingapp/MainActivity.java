@@ -6,10 +6,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -22,9 +20,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.phannguyen.datingapp.Cards.arrayAdapter;
-import com.phannguyen.datingapp.Cards.cards;
-import com.phannguyen.datingapp.Matches.MatchesActivity;
-import com.phannguyen.datingapp.R;
+import com.phannguyen.datingapp.Cards.Cards;
 import com.lorentzos.flingswipe.SwipeFlingAdapterView;
 
 import java.util.ArrayList;
@@ -33,15 +29,17 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
-    private cards cards_data[];
+    private Cards cards_data[];
     private com.phannguyen.datingapp.Cards.arrayAdapter arrayAdapter;
     private int i;
     private FirebaseAuth mAuth;
-    private ImageView imageView;
+    private ImageView userImageView;
     private  String currentUId;
     private DatabaseReference usersDb,mUserDatabase;
-    ListView listView;
-    List<cards> rowItems;
+    List<Cards> rowItems;
+    private  String userSex;
+    private String oppositeUserSex;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,10 +50,10 @@ public class MainActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         currentUId=mAuth.getCurrentUser().getUid();
-        imageView=(ImageView) findViewById(R.id.userImage);
+        userImageView=(ImageView) findViewById(R.id.userImage);
         getUserInfo();
         checkUserSex();
-        rowItems = new ArrayList<cards>();
+        rowItems = new ArrayList<Cards>();
 
         arrayAdapter = new arrayAdapter(this, R.layout.item, rowItems );
 
@@ -64,39 +62,39 @@ public class MainActivity extends AppCompatActivity {
         flingContainer.setFlingListener(new SwipeFlingAdapterView.onFlingListener() {
             @Override
             public void removeFirstObjectInAdapter() {
-                // this is the simplest way to delete an object from the Adapter (/AdapterView)
-                Log.d("LIST", "removed object!");
+                //delete an object from the Adapter (/AdapterView)
                 rowItems.remove(0);
                 arrayAdapter.notifyDataSetChanged();
             }
 
             @Override
             public void onLeftCardExit(Object dataObject) {
-                cards obj = (cards) dataObject;
+                Cards obj = (Cards) dataObject;
                 String userId = obj.getUserId();
-                usersDb.child(userId).child("connections").child("nope").child(currentUId).setValue(true);
+                usersDb.child(userId).child("connections").child("unlike").child(currentUId).setValue(true);
 
                 Toast.makeText(MainActivity.this,"Không Thích",Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onRightCardExit(Object dataObject) {
-
-                cards obj = (cards) dataObject;
+                Cards obj = (Cards) dataObject;
                 String userId = obj.getUserId();
-                usersDb.child(userId).child("connections").child("yeps").child(currentUId).setValue(true);
+                usersDb.child(userId).child("connections").child("like").child(currentUId).setValue(true);
                 isConnectionMatch(userId);
                 Toast.makeText(MainActivity.this,"Thích",Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onAdapterAboutToEmpty(int itemsInAdapter) {
-
+                // Ask for more data here
+                arrayAdapter.notifyDataSetChanged();
+//                i++;
             }
 
             @Override
             public void onScroll(float scrollProgressPercent) {
-
+                //System.out.println("scrolling....");
             }
         });
 
@@ -112,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void getUserInfo() {
         mUserDatabase=usersDb.child(currentUId);
+        //event to handle user change profile image
         mUserDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -121,35 +120,29 @@ public class MainActivity extends AppCompatActivity {
                         String profileImageUrl = map.get("profileImageUrl").toString();
                         switch (profileImageUrl){
                             case "default":
-                                Glide.with(getApplication()).load(R.mipmap.ic_launcher).into(imageView);
+                                Glide.with(getApplication()).load(R.mipmap.ic_launcher).into(userImageView);
                                 break;
-
                             default:
-                                Glide.with(getApplication()).load(profileImageUrl).into(imageView);
+                                Glide.with(getApplication()).load(profileImageUrl).into(userImageView);
                                 break;
                         }
-
                     }
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
             }
         });
     }
 
     private void isConnectionMatch(String userId) {
-        DatabaseReference currentUserConnectionsDb = usersDb.child(currentUId).child("connections").child("yeps").child(userId);
+        DatabaseReference currentUserConnectionsDb = usersDb.child(currentUId).child("connections").child("like").child(userId);
         currentUserConnectionsDb.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.exists()){
                     Toast.makeText(MainActivity.this,"Bạn và người ấy đã kết nối",Toast.LENGTH_SHORT).show();
-                    String key = FirebaseDatabase.getInstance("https://beardating-d48a5-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference().child("Chat").push().getKey();
-                    usersDb.child(snapshot.getKey()).child("connections").child("matches").child(currentUId).child("ChatId").setValue(key);
-                    usersDb.child(currentUId).child("connections").child("matches").child(snapshot.getKey()).child("ChatId").setValue(key);
                 }
             }
             @Override
@@ -157,11 +150,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-    private  String userSex;
-    private String oppositeUserSex;
+
+
+
     public void checkUserSex(){
         final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         DatabaseReference userDb = usersDb.child(user.getUid());
+
+
+        //Event to handle user sex and set oppositeUserSex
         userDb.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -187,19 +184,25 @@ public class MainActivity extends AppCompatActivity {
         });
     }
     public void getOppositeSexUser(){
+        //Get all opposite sex users
         usersDb.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if(snapshot.child("sex").getValue()!=null){
-                    if(snapshot.exists() && !snapshot.child("connections").child("nope").hasChild(currentUId) && !snapshot.child("connections").child("yeps").hasChild(currentUId) && snapshot.child("sex").getValue().toString().equals(oppositeUserSex)){
+                    //remove unlike users
+                    if(snapshot.exists()
+                            && !snapshot.child("connections").child("unlike").hasChild(currentUId)
+                            && !snapshot.child("connections").child("like").hasChild(currentUId)
+                            && snapshot.child("sex").getValue().toString().equals(oppositeUserSex))
+                    {
                         String profileImageUrl = "default";
                         if(!snapshot.child("profileImageUrl").getValue().equals("default")){
                             profileImageUrl=snapshot.child("profileImageUrl").getValue().toString();
                         }
                         else{
-                            profileImageUrl="https://firebasestorage.googleapis.com/v0/b/datingapp-babdb.appspot.com/o/profileImages%2Fk3cd7O8XCCZm6aOzHsG9mVKgejD2?alt=media&token=c73d65dd-e301-463e-bef3-2dd69cf4f2c5";
+                            profileImageUrl="https://firebasestorage.googleapis.com/v0/b/beardating-d48a5.appspot.com/o/ic_default.jpg?alt=media&token=36c81a84-4748-4c77-8556-8f256a77742e";
                         }
-                        cards item = new cards(snapshot.getKey(),snapshot.child("name").getValue().toString(),profileImageUrl);
+                        Cards item = new Cards(snapshot.getKey(),snapshot.child("name").getValue().toString(),profileImageUrl);
                         rowItems.add(item);
                         arrayAdapter.notifyDataSetChanged();
                     }
@@ -226,17 +229,10 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
         return;
-
     }
 
     public void goToSettings(View view) {
-        Intent intent = new Intent(MainActivity.this,SettingsActivity.class);
-        startActivity(intent);
-        return;
-    }
-
-    public void goToMatches(View view) {
-        Intent intent = new Intent(MainActivity.this, MatchesActivity.class);
+        Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
         return;
     }
