@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.exists()){
-                    Toast.makeText(MainActivity.this,"Bạn và người ấy đã kết nối",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this,"Puppy and Kitten are matched!",Toast.LENGTH_SHORT).show();
                 }
             }
             @Override
